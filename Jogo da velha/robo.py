@@ -89,17 +89,17 @@ servidor_tcp.bind(('10.25.3.194', 9998))
 servidor_tcp.listen(1)
 conn, addr = servidor_tcp.accept()
 grupos = " ".join("Escolha um tema: \n[1] Animal \n[2]Comida \n[3]País")
-conn.send(f"Escolha um grupo de palavras \n{grupos}: ".encode())
-grupo = conn.recv(1024).decode()
 print(grupo)
 
 print("Aguardando quem ousa me desafiar...")
 
 while True:
+    conn.send(f"Escolha um grupo de palavras \n{grupos}: ".encode())
+    grupo = conn.recv(1024).decode()
     # Espera o cliente enviar "iniciar"
     data, address = servidor.recvfrom(1024)
 
-    usuarioEscolheu = 1
+    usuarioEscolheu = int(grupo)
     if usuarioEscolheu == 1:
         palavraRodada = random.choice(animal)
     elif usuarioEscolheu == 2:
