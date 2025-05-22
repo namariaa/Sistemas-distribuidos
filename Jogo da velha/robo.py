@@ -83,9 +83,9 @@ def caixinha(texto):
 
 # Iniciar socket
 servidor = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-servidor.bind(('127.0.0.1', 9999))
+servidor.bind(('10.25.3.194', 9999))
 servidor_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-servidor_tcp.bind(('127.0.0.1', 9998))
+servidor_tcp.bind(('10.25.3.194', 9998))
 servidor_tcp.listen(1)
 conn, addr = servidor_tcp.accept()
 grupos = " ".join("Escolha um tema: \n[1] Animal \n[2]Comida \n[3]País")
@@ -99,8 +99,7 @@ while True:
     # Espera o cliente enviar "iniciar"
     data, address = servidor.recvfrom(1024)
 
-    # Define o tema fixo por enquanto
-    usuarioEscolheu = grupo
+    usuarioEscolheu = 1
     if usuarioEscolheu == 1:
         palavraRodada = random.choice(animal)
     elif usuarioEscolheu == 2:
