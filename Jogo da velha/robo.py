@@ -83,13 +83,12 @@ def caixinha(texto):
 
 # Iniciar socket
 servidor = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-servidor.bind(('10.25.3.194', 9999))
+servidor.bind(('10.25.2.154', 9999))
 servidor_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-servidor_tcp.bind(('10.25.3.194', 9998))
+servidor_tcp.bind(('10.25.2.154', 9998))
 servidor_tcp.listen(1)
 conn, addr = servidor_tcp.accept()
 grupos = " ".join("Escolha um tema: \n[1] Animal \n[2]Comida \n[3]País")
-print(grupo)
 
 print("Aguardando quem ousa me desafiar...")
 
