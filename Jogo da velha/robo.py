@@ -6,6 +6,81 @@ animal = [['c', 'o', 'a', 'l', 'a'], ['r', 'a', 'p', 'o', 's', 'a'], ['i', 'g', 
 comida = [['p', 'i', 'p', 'o', 'c', 'a'], ['c', 'a', 'v', 'i', 'a', 'r'], ['m', 'o', 's', 't', 'a', 'r', 'd', 'a']]
 pais = [['c', 'a', 'n', 'a', 'd', 'á'], ['h', 'u', 'n', 'g', 'r', 'i', 'a'], ['b', 'a', 'h', 'a', 'm', 'a', 's']]
 
+def desenhaBoneco(chances):
+    bonecos = [
+        """
+        --------
+        |      |
+        |      
+        |      
+        |      
+        |      
+        --------
+        """,
+        """
+        --------
+        |      |
+        |      O
+        |      
+        |      
+        |      
+        --------
+        """,
+        """
+        --------
+        |      |
+        |      O
+        |      |
+        |      
+        |      
+        --------
+        """,
+        """
+        --------
+        |      |
+        |      O
+        |     /|
+        |      
+        |      
+        --------
+        """,
+        """
+        --------
+        |      |
+        |      O
+        |     /|\\
+        |      
+        |      
+        --------
+        """,
+        """
+        --------
+        |      |
+        |      O
+        |     /|\\
+        |     / 
+        |      
+        --------
+        """,
+        """
+        --------
+        |      |
+        |      O
+        |     /|\\
+        |     / \\
+        |      
+        --------
+        """
+    ]
+    return bonecos[6 - chances]
+
+def caixinha(texto):
+    linhas = texto.strip().split('\n')
+    print("---------------------")
+    for linha in linhas:
+        print(f"| {linha:<18} |")
+    print("---------------------")
+
 # Iniciar socket
 servidor = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 servidor.bind(('127.0.0.1', 9999))
@@ -39,7 +114,11 @@ while True:
     under = ""
     for i in palavraRodada:
         under += "* "
-    servidor.sendto(f"{under}".encode(), address)
+
+    mensagemInicial = f"{under}\n\n{desenhaBoneco(chances)}"
+    caixinha(mensagemInicial)
+    servidor.sendto(mensagemInicial.encode(), address)
+    
     while True:
         letraData, _ = servidor.recvfrom(1024)
         letra = letraData.decode().strip().lower()
@@ -50,7 +129,9 @@ while True:
             for i in palavraRodada:
                 if i in letrasAcertadas:
                     mostrarLetra += i + " "
-            servidor.sendto(f"Errou! \n{mostrarLetra}".encode(), address)
+            mensagem = f"Errou! Chances: {chances}\n{mostrarLetra}\n\n{desenhaBoneco(chances)}"
+            caixinha(mensagem)
+            servidor.sendto(mensagem.encode(), address)
         else:
             letrasAcertadas.append(letra)
             mostrarLetra = ""
@@ -61,21 +142,32 @@ while True:
                     certos += 1
             if certos == len(palavraRodada):
                 break
-            servidor.sendto(f"Acetou! \n{mostrarLetra}".encode(), address)
+            mensagem = f"Acertou!\n{mostrarLetra}\n\n{desenhaBoneco(chances)}"
+            caixinha(mensagem)
+            servidor.sendto(mensagem.encode(), address)
         
 
         if letra in letrasChutadas:
-            servidor.sendto("Letra repetida, melhor tentar outra".encode(), address)
+            mensagem = f"Letra repetida, tente outra!\n\n{desenhaBoneco(chances)}"
+            caixinha(mensagem)
+            servidor.sendto(mensagem.encode(), address)
             continue
 
         letrasChutadas.append(letra)
 
         if chances == 0:
+            mensagem = f"Game Over! A palavra era: {''.join(palavraRodada)}\n\n{desenhaBoneco(chances)}"
+            caixinha(mensagem)
+            servidor.sendto(mensagem.encode(), address)
+            servidor.close()
             break
         if len(palavraRodada) == len(letrasAcertadas):
             break
     
     if (chances != 0):
-        servidor.sendto("Deu certo você acertou e ganhou".encode(), address)
+        mensagem = f"Deu certo, você acertou e ganhou!\nPalavra: {''.join(palavraRodada)}\n\n{desenhaBoneco(chances)}"
+        caixinha(mensagem)
+        servidor.sendto(mensagem.encode(), address)
         servidor.close()
+        
         
