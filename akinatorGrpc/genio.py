@@ -5,40 +5,33 @@ import akinator
 from akinator.exceptions import CantGoBackAnyFurther, InvalidThemeError  
 
 
-interface = ("\033[1;36mBem-vindo ao incrível mundo do Akinator!\033[0m\n") + ("Pense em um personagem e eu adivinharei quem é...\n")
-+(r"""
-                                                                      ####         
-                                                                    ##mmmm##    
-                          ####@@::------::::mm######          ####MMmmmm@@      
-              ######mm                                ##    ##mmmmmmmm##        
-        ##      ..  ##mm                                  ++##mm##                             
-      @@  ##                MM##  --####MMMM--      ..++MM####::  @@            
-                  ##    ##    MMmm                                  ##          
-        ##      MM  @@    ##    mm..                                    ##      
-    ##  ..      @@++++++++@@      ##                                      ##    
-    ##          ++  ##    ##        ##                                      ##  
-    ##MM                              ##  ##                                  ##
-      ##                        --..        ##                                ##
-      ##        ++##MM--    ............  --@@mm                              ##
-        @@@@MM  ................................  ##                          ##
-            mm::  ..............    ----..  ........  ######                    
-        ####@@######......::####################  ....######--                  
-            --::##  ##....  ......  ::......  ####....##############        ##  
-            mm####..............MM  ####++......  ....@@####  ......        ##  
-            MM    ##++..  ........  ++MM##@@..........@@##  ..  @@MM..MM        
-            ::  ####++--..........    ##--    ........##::..##MM....      ##    
-              ....MM..................................##..##....@@..##  --                
-          ##....++++..........--..........................  ..--  ##                   
-            ....########--  ######    ##............  ::  mmMM                  
-            ..  --  ..##::mm@@  ..    ................@@++@@##                  
-            ........::MMmmMM@@##::........................                                                
-              --....  ##  ........................  ##                          
-                @@..######....................--##                              
-                  ########MM..........  --####                                  
-                  ##########      ####                                                                                   
-                    ######                                                      
-                  ##                                                            
-""")+("\033[1;32mCOMANDOS:\033[0m") +("s = Sim    | n = Não    | sla = Não sei")+("p = Provavelmente | pn = Provavelmente não | v = Voltar\n")
+interface = (r"""
+ .-=-.
+                         /  ! )\
+                      __ \__/__/
+                     / _<( ^.^ )
+                    / /   \ c /O
+                    \ \_.-./=\.-._     _
+                     `-._  `~`    `-,./_<
+                         `\' \'\`'----'
+                       *   \  . \          *
+                            `-~~~\   .
+                       .      `-._`-._   *
+                             *    `~~~-,      *
+                   ()                   * )
+                  <^^>             *     (   .
+                 .-""-.                    )
+      .---.    ."-....-"-._     _...---''`/. '
+     ( (`\ \ .'            ``-''    _.-"'`
+      \ \ \ : :.                 .-'
+       `\`.\: `:.             _.'
+       (  .'`.`            _.'
+        ``    `-..______.-'
+                  ):.  (
+                ."-....-".
+              .':.        `.
+              "-..______..-"                                                     
+""")+("\033[1;36mBem-vindo ao incrível mundo do Akinator!\033[0m\n") + ("Pense em um personagem e eu adivinharei quem é...\n")+("\033[1;32mCOMANDOS:\033[0m") +("s = Sim    | n = Não    | sla = Não sei")+("p = Provavelmente | pn = Provavelmente não | v = Voltar\n")
 
 class GenioService(genio_pb2_grpc.GenioServiceServicer):
     def chamaAPI(self, request_iterator, context):
@@ -114,7 +107,7 @@ class GenioService(genio_pb2_grpc.GenioServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     genio_pb2_grpc.add_GenioServiceServicer_to_server(GenioService(), server)
-    server.add_insecure_port('10.25.2.150e:50051')
+    server.add_insecure_port('10.25.2.150:50051')
     server.start()
     server.wait_for_termination()
 
