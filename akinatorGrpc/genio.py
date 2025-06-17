@@ -6,7 +6,7 @@ from akinator.exceptions import CantGoBackAnyFurther, InvalidThemeError
 
 
 interface = (r"""
- .-=-.
+                          .-=-.
                          /  ! )\
                       __ \__/__/
                      / _<( ^.^ )
