@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 service GenioService {
-  rpc chamaAPI (GenioRequest) returns (GenioReply);
+  rpc chamaAPI (GenioRequest) returns (stream GenioReply);
 }
 
 message GenioRequest {

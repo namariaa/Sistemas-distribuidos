@@ -3,14 +3,15 @@ import grpc
 import genio_pb2, genio_pb2_grpc
 import akinator
 
-class GenioService(genio_pb2_grpc.GenioService): #Criamos uma classe a aprtir da base feita no proto
+class GenioService(genio_pb2_grpc.GenioServiceServicer): #Criamos uma classe a aprtir da base feita no proto
     def chamaAPI(self, request, context): #Implementamos o método definido no serviço do .proto
         aki = akinator.Akinator()
-        aki.start_game(language='pt')
-        yield genio_pb2.Resposta(mensagem=aki.question) #Manda primeira pergunta sem encerrar sessão
+        aki.lang = 'pt'
+        aki.start_game()
+        yield genio_pb2.GenioReply(mensagem=aki.question) #Manda primeira pergunta sem encerrar sessão
         
         while not aki.finished:
-            user_input = request.nome.strip().lower()
+            user_input = request.resposta.strip().lower()
             if user_input == "v":
                 try:
                     aki.back()
