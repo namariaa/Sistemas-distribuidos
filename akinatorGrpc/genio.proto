@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+service GenioService {
+  rpc chamaAPI (GenioRequest) returns (GenioReply);
+}
+
+message GenioRequest {
+  string resposta = 1;
+}
+
+message GenioReply {
+  string mensagem = 1;
+  bool fim_jogo = 2;
+  string personagem = 3;
+  string descricao = 4;
+  string foto = 5;
+}
