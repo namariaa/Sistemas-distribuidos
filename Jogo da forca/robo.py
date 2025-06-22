@@ -25,7 +25,7 @@ while True:
     data, address = servidor.recvfrom(1024)
 
     # Define o tema fixo por enquanto
-    usuarioEscolheu = grupo
+    usuarioEscolheu = 1
     if usuarioEscolheu == 1:
         palavraRodada = random.choice(animal)
     elif usuarioEscolheu == 2:
