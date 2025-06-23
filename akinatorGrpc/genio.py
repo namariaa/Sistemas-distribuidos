@@ -4,12 +4,49 @@ import genio_pb2, genio_pb2_grpc
 import akinator
 from akinator.exceptions import CantGoBackAnyFurther, InvalidThemeError  
 
+
+interface = ("\033[1;36mBem-vindo ao incrível mundo do Akinator!\033[0m\n") + ("Pense em um personagem e eu adivinharei quem é...\n")
++(r"""
+                                                                      ####         
+                                                                    ##mmmm##    
+                          ####@@::------::::mm######          ####MMmmmm@@      
+              ######mm                                ##    ##mmmmmmmm##        
+        ##      ..  ##mm                                  ++##mm##                             
+      @@  ##                MM##  --####MMMM--      ..++MM####::  @@            
+                  ##    ##    MMmm                                  ##          
+        ##      MM  @@    ##    mm..                                    ##      
+    ##  ..      @@++++++++@@      ##                                      ##    
+    ##          ++  ##    ##        ##                                      ##  
+    ##MM                              ##  ##                                  ##
+      ##                        --..        ##                                ##
+      ##        ++##MM--    ............  --@@mm                              ##
+        @@@@MM  ................................  ##                          ##
+            mm::  ..............    ----..  ........  ######                    
+        ####@@######......::####################  ....######--                  
+            --::##  ##....  ......  ::......  ####....##############        ##  
+            mm####..............MM  ####++......  ....@@####  ......        ##  
+            MM    ##++..  ........  ++MM##@@..........@@##  ..  @@MM..MM        
+            ::  ####++--..........    ##--    ........##::..##MM....      ##    
+              ....MM..................................##..##....@@..##  --                
+          ##....++++..........--..........................  ..--  ##                   
+            ....########--  ######    ##............  ::  mmMM                  
+            ..  --  ..##::mm@@  ..    ................@@++@@##                  
+            ........::MMmmMM@@##::........................                                                
+              --....  ##  ........................  ##                          
+                @@..######....................--##                              
+                  ########MM..........  --####                                  
+                  ##########      ####                                                                                   
+                    ######                                                      
+                  ##                                                            
+""")+("\033[1;32mCOMANDOS:\033[0m") +("s = Sim    | n = Não    | sla = Não sei")+("p = Provavelmente | pn = Provavelmente não | v = Voltar\n")
+
 class GenioService(genio_pb2_grpc.GenioServiceServicer):
     def chamaAPI(self, request_iterator, context):
         aki = akinator.Akinator()
         aki.start_game(language='pt')
         respostas_validas = ['s', 'n', 'sla', 'p', 'pn', 'v']
-        yield genio_pb2.GenioReply(mensagem=aki.question, fim_jogo=False)
+
+        yield genio_pb2.GenioReply(mensagem=interface +str(aki.question), fim_jogo=False)
         
         for request in request_iterator:
             user_input = request.resposta.strip().lower()
@@ -77,7 +114,7 @@ class GenioService(genio_pb2_grpc.GenioServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     genio_pb2_grpc.add_GenioServiceServicer_to_server(GenioService(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port('10.25.2.150e:50051')
     server.start()
     server.wait_for_termination()
 

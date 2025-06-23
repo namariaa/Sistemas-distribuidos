@@ -19,7 +19,7 @@ const proto = grpc.loadPackageDefinition(packageDefinition);
 
 // Cria o cliente apontando para o servidor Python
 const client = new proto.GenioService(
-  'localhost:50051',
+  '10.25.2.150:50051',
   grpc.credentials.createInsecure()
 );
 
