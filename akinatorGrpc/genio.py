@@ -2,57 +2,82 @@ from concurrent import futures
 import grpc
 import genio_pb2, genio_pb2_grpc
 import akinator
+from akinator.exceptions import CantGoBackAnyFurther, InvalidThemeError  
 
-class GenioService(genio_pb2_grpc.GenioServiceServicer): #Criamos uma classe a aprtir da base feita no proto
-    def chamaAPI(self, request, context): #Implementamos o método definido no serviço do .proto
+class GenioService(genio_pb2_grpc.GenioServiceServicer):
+    def chamaAPI(self, request_iterator, context):
         aki = akinator.Akinator()
-        aki.lang = 'pt'
-        aki.start_game()
-        yield genio_pb2.GenioReply(mensagem=aki.question) #Manda primeira pergunta sem encerrar sessão
+        aki.start_game(language='pt')
+        respostas_validas = ['s', 'n', 'sla', 'p', 'pn', 'v']
+        yield genio_pb2.GenioReply(mensagem=aki.question, fim_jogo=False)
         
-        while not aki.finished:
+        for request in request_iterator:
             user_input = request.resposta.strip().lower()
-            if user_input == "v":
-                try:
-                    aki.back()
-                except akinator.CantGoBackAnyFurther:
-                    print("Você não pode voltar atrás!")
-            else:
-                try:
-                    if (user_input == 's'):
-                        user_input = 'y'
-                    elif (user_input == 'sla'):
-                        user_input = 'i'
-                    aki.answer(user_input)
+            
+            if user_input not in respostas_validas:
+                yield genio_pb2.GenioReply(
+                    mensagem="Resposta inválida! Use apenas: s, n, sla, p, pn, v",
+                    fim_jogo=False
+                )
+                continue
 
-                    if aki.finished: #Se terminou
-                        aki.win()
-                        primeiro_chute = aki.first_guess
-                        yield genio_pb2.Resposta(
-                            fim_jogo=True,
-                            mensagem="Fim de jogo!",
-                            personagem=primeiro_chute['name'],
-                            descricao=primeiro_chute['description'],
-                            foto=primeiro_chute['absolute_picture_path']
+            try:
+                if user_input == "v":
+                    try:
+                        aki.back()
+                    except CantGoBackAnyFurther:
+                        yield genio_pb2.GenioReply(
+                            mensagem="Você não pode voltar mais!",
+                            fim_jogo=False
                         )
+                    else:
+                        yield genio_pb2.GenioReply(
+                            mensagem=aki.question,
+                            fim_jogo=False
+                        )
+                else:
+                    if user_input == 's':
+                        user_input = 'y'
+                    elif user_input == 'sla':
+                        user_input = 'i'
+                    
+                    aki.answer(user_input)
+                    
+                    if aki.finished:
+                        yield genio_pb2.GenioReply(
+                                mensagem="Fim de jogo!",
+                                fim_jogo=True,
+                                personagem=aki.name_proposition,
+                                descricao=aki.description_proposition,
+                                foto=aki.photo
+                            )
                         return
+                    else:
+                        yield genio_pb2.GenioReply(
+                            mensagem=aki.question,
+                            fim_jogo=False
+                        )
+            
+            
+            except InvalidThemeError:
+                yield genio_pb2.GenioReply(
+                    mensagem="Resposta inválida. Tente novamente.",
+                    fim_jogo=False
+                )
+            except Exception as e:
+                print(f"Erro interno: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                yield genio_pb2.GenioReply(
+                    mensagem=f"Erro interno: {str(e)}",
+                    fim_jogo=True
+                )
+                return
 
-                    yield genio_pb2.GenioReply(mensagem=aki.question) #O objeto retornado deve ser do tipo GenioReply
-
-                except akinator.InvalidChoiceError:
-                    print("Resposta inválida. Tente novamente.")
-                
-        print("\n--- Fim de jogo ---")
-        print(f"Chute: {aki.name_proposition}")
-        print(f"Descrição: {aki.description_proposition}")
-        print(f"Pseudo: {aki.pseudo}")
-        print(f"Foto: {aki.photo}")
-        print(f"O gênio diz: {aki.question}")
-        
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10)) #Cria servidor. Tem worker = 10 para lidar com chamadas concorrentes
-    genio_pb2_grpc.add_GenioServiceServicer_to_server(GenioService(), server) 
-    server.add_insecure_port('[::]:50051') #Confgurando porta 
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    genio_pb2_grpc.add_GenioServiceServicer_to_server(GenioService(), server)
+    server.add_insecure_port('[::]:50051')
     server.start()
     server.wait_for_termination()
 

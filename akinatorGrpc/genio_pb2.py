@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bgenio.proto\"\x1c\n\x0cGenioRequest\x12\x0c\n\x04nome\x18\x01 \x01(\t\"\x1e\n\nGenioReply\x12\x10\n\x08mensagem\x18\x01 \x01(\t26\n\x0cGenioService\x12&\n\x08\x64izerOla\x12\r.GenioRequest\x1a\x0b.GenioReplyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bgenio.proto\" \n\x0cGenioRequest\x12\x10\n\x08resposta\x18\x01 \x01(\t\"e\n\nGenioReply\x12\x10\n\x08mensagem\x18\x01 \x01(\t\x12\x10\n\x08\x66im_jogo\x18\x02 \x01(\x08\x12\x12\n\npersonagem\x18\x03 \x01(\t\x12\x11\n\tdescricao\x18\x04 \x01(\t\x12\x0c\n\x04\x66oto\x18\x05 \x01(\t2:\n\x0cGenioService\x12*\n\x08\x63hamaAPI\x12\r.GenioRequest\x1a\x0b.GenioReply(\x01\x30\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,9 +32,9 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'genio_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_GENIOREQUEST']._serialized_start=15
-  _globals['_GENIOREQUEST']._serialized_end=43
-  _globals['_GENIOREPLY']._serialized_start=45
-  _globals['_GENIOREPLY']._serialized_end=75
-  _globals['_GENIOSERVICE']._serialized_start=77
-  _globals['_GENIOSERVICE']._serialized_end=131
+  _globals['_GENIOREQUEST']._serialized_end=47
+  _globals['_GENIOREPLY']._serialized_start=49
+  _globals['_GENIOREPLY']._serialized_end=150
+  _globals['_GENIOSERVICE']._serialized_start=152
+  _globals['_GENIOSERVICE']._serialized_end=210
 # @@protoc_insertion_point(module_scope)

@@ -34,8 +34,8 @@ class GenioServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.dizerOla = channel.unary_unary(
-                '/GenioService/dizerOla',
+        self.chamaAPI = channel.stream_stream(
+                '/GenioService/chamaAPI',
                 request_serializer=genio__pb2.GenioRequest.SerializeToString,
                 response_deserializer=genio__pb2.GenioReply.FromString,
                 _registered_method=True)
@@ -44,7 +44,7 @@ class GenioServiceStub(object):
 class GenioServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def dizerOla(self, request, context):
+    def chamaAPI(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,8 +53,8 @@ class GenioServiceServicer(object):
 
 def add_GenioServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'dizerOla': grpc.unary_unary_rpc_method_handler(
-                    servicer.dizerOla,
+            'chamaAPI': grpc.stream_stream_rpc_method_handler(
+                    servicer.chamaAPI,
                     request_deserializer=genio__pb2.GenioRequest.FromString,
                     response_serializer=genio__pb2.GenioReply.SerializeToString,
             ),
@@ -70,7 +70,7 @@ class GenioService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def dizerOla(request,
+    def chamaAPI(request_iterator,
             target,
             options=(),
             channel_credentials=None,
@@ -80,10 +80,10 @@ class GenioService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
+        return grpc.experimental.stream_stream(
+            request_iterator,
             target,
-            '/GenioService/dizerOla',
+            '/GenioService/chamaAPI',
             genio__pb2.GenioRequest.SerializeToString,
             genio__pb2.GenioReply.FromString,
             options,

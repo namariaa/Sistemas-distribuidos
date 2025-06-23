@@ -1,5 +1,11 @@
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const readline = require('readline');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 // Carrega o .proto
 const packageDefinition = protoLoader.loadSync('genio.proto', {
@@ -18,15 +24,25 @@ const client = new proto.GenioService(
 );
 
 // Faz a chamada para o método chamaAPI
-client.chamaAPI({ resposta: 'Minha resposta aqui' }, (err, response) => {
-  if (err) {
-    console.error('Erro ao chamar a API:', err);
+const call = client.chamaAPI();
+
+call.on('data', (response) => {
+  if (response.fim_jogo) {
+    if (response.personagem) {
+      console.log('\n--- FIM DE JOGO ---');
+      console.log('Personagem:', response.personagem);
+      console.log('Descrição:', response.descricao);
+    } else {
+      console.log('\nErro:', response.mensagem);
+    }
+    call.end();
+    rl.close();
   } else {
-    console.log('Resposta do servidor:');
-    console.log('mensagem:', response.mensagem);
-    console.log('fim_jogo:', response.fim_jogo);
-    console.log('personagem:', response.personagem);
-    console.log('descricao:', response.descricao);
-    console.log('foto:', response.foto);
+    console.log('\nGenio:', response.mensagem);
+    rl.question('Sua resposta (s/n/sla/p/pn/v): ', (answer) => {
+      call.write({ resposta: answer.trim().toLowerCase() });
+    });
   }
 });
+
+call.write({ resposta: "" });  
