@@ -16,6 +16,35 @@ function Forms() {
     link: string;
   }) => {
     console.log(data);
+
+    const soapBody = `
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:mus="http://example.com/music">
+        <soapenv:Header/>
+        <soapenv:Body>
+          <mus:GetMusic>
+            <name>${data.musica}</name>
+            <artist>${data.artista}</artist>
+            <link>${data.link}</link>
+          </mus:GetMusic>
+        </soapenv:Body>
+      </soapenv:Envelope>
+    `;
+
+    try {
+      const res = await fetch("http://localhost:8000/music", {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/xml;charset=UTF-8",
+          SOAPAction: "http://example.com/music/GetMusic",
+        },
+        body: soapBody,
+      });
+
+      const text = await res.text();
+      console.log(text);
+    } catch (error) {
+      console.error("Erro ao chamar SOAP:", error);
+    }
   };
 
   const {
