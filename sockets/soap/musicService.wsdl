@@ -1,0 +1,62 @@
+<definitions name="musicService"
+  targetNamespace="http://example.com/weather"
+  xmlns:tns="http://example.com/weather"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <types>
+    <xsd:schema>
+      <xsd:element name="GetMusicRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="location" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="GetMusicResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="temperature" type="xsd:string"/>
+            <xsd:element name="description" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+  <message name="GetMusicRequestMessage">
+    <part name="request" element="tns:GetMusicRequest"/>
+  </message>
+  <message name="GetMusicResponseMessage">
+    <part name="response" element="tns:GetMusicResponse"/>
+  </message>
+
+  <portType name="musicPortType">
+    <operation name="GetMusic">
+      <input message="tns:GetMusicRequestMessage"/>
+      <output message="tns:GetMusicResponseMessage"/>
+    </operation>
+  </portType>
+
+  <binding name="MusicBinding" type="tns:MusicPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetMusic">
+      <soap:operation soapAction="http://example.com/music/GetMusic"/>
+      <input>
+        <soap:body use="encoded" namespace="http://example.com/weather"
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded" namespace="http://example.com/weather"
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="WeatherService">
+    <port name="WeatherPort" binding="tns:WeatherBinding">
+      <soap:address location="http://example.com/weather"/>
+    </port>
+  </service>
+
+</definitions>
