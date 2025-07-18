@@ -1,6 +1,6 @@
 <definitions name="musicService"
-  targetNamespace="http://example.com/weather"
-  xmlns:tns="http://example.com/weather"
+  targetNamespace="http://localhost:8000/"
+  xmlns:tns="http://example.com/music"
   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
@@ -9,15 +9,18 @@
       <xsd:element name="GetMusicRequest">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="location" type="xsd:string"/>
+            <xsd:element name="name" type="xsd:string"/>
+             <xsd:element name="artist" type="xsd:string"/>
+              <xsd:element name="link" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
       <xsd:element name="GetMusicResponse">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="temperature" type="xsd:string"/>
-            <xsd:element name="description" type="xsd:string"/>
+              <xsd:element name="name" type="xsd:string"/>
+              <xsd:element name="artist" type="xsd:string"/>
+              <xsd:element name="link" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
@@ -53,9 +56,9 @@
     </operation>
   </binding>
 
-  <service name="WeatherService">
-    <port name="WeatherPort" binding="tns:WeatherBinding">
-      <soap:address location="http://example.com/weather"/>
+  <service name="MusicService">
+    <port name="WeatherPort" binding="tns:MusicBinding">
+      <soap:address location="http://example.com/music"/>
     </port>
   </service>
 

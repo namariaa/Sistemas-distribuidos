@@ -4,14 +4,13 @@ const service = {
   MusicService: {
     MusicPort: {
       GetMusic: function(args, callback) {
-        const location = args.location;
-        const temperature = '25°C';
-        const description = 'Sunny';
-
-        // Return the response
+        const name = args.name;
+        const artist = args.artist;
+        const link = args.link;
         const result = {
-          temperature: temperature,
-          description: description
+          name: name,
+          artist: artist,
+          link : link
         };
         callback(null, result);
       }
@@ -19,9 +18,15 @@ const service = {
   }
 };
 
-const xml = require('fs').readFileSync('musicService.wsdl', 'utf8');
-const server = soap.listen({ path: '/weather', xml: xml }, function() {
-  console.log('SOAP server running at http://localhost:8000/weather?wsdl');
+const server =  require('http').createServer(function (request, response) {
+  response.end('404: Not Found');
 });
 
-server.addService(xml, service, { suppressStack: true });
+
+const xml = require('fs').readFileSync('musicService.wsdl', 'utf8');
+
+soap.listen(server, '/music', service, xml);
+
+server.listen(8000, function () {
+  console.log('SOAP server running at http://localhost:8000/music?wsdl');
+});
