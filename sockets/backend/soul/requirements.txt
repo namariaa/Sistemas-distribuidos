@@ -4,3 +4,4 @@ pytubefix==8.12.2
 drf-spectacular==0.28.0
 psycopg-binary==3.2.6
 django-cors-headers==4.7.0
+drf-spectacular
