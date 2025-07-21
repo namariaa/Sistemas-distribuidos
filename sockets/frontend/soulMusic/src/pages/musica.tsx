@@ -119,9 +119,6 @@ const Musica: React.FC = () => {
             <div className="logo">
               <img src={Logo} alt="Logo" />
             </div>
-            <nav className="menu">
-              <a href="#musica">Música</a>
-            </nav>
           </header>
           <Forms />
           {isLoading && (

@@ -9,11 +9,14 @@ const service = {
         MusicPort: {
             GetMusic: function(args) {
                 return {
-                    name: args.name,
-                    artist: args.artist,
-                    link: args.link
-                };
-            }
+                    dados: {
+                        id: Math.floor(Math.random() * 10000),
+                        name: args.name,
+                        artist: args.artist,
+                        link: args.link
+        }
+    };
+}
         }
     }
 };
@@ -28,7 +31,6 @@ try {
         path: '/music',
         services: service,
         xml: xml,
-        // 5. Opções importantes
         wsdlOptions: {
             escapeXML: false,
             returnFault: true

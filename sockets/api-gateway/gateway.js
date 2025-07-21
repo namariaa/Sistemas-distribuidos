@@ -31,18 +31,31 @@ app.post('/save-music', async (req, res) => {
     if (!soapResult.dados || !soapResult.dados.id) {
       throw new Error('Falha ao verificar salvamento no SOAP');
     }
+
     
-    // 3. Retorna resposta consolidada
+    
+    const restResult = await axios.post(
+      'http://localhost:8000/api/musica/',
+      {
+        nome: soapResult.dados.name,
+        autor: soapResult.dados.artist,
+        link: soapResult.dados.link,
+      }
+    );
+    
     res.json({
-      sistema: 'SOAP',
-      status: 'Música processada com sucesso',
-      id_musica: soapResult.dados.id,
-      aviso: 'O envio ao Django é assíncrono e pode demorar'
-    });
+    sistema: 'SOAP + REST',
+    status: 'Música processada com sucesso',
+    id_musica: restResult,
+    aviso: 'Download disponível em /download',
+  });
+    const idMusica = restResult.data.id;
+
+   
     
   } catch (error) {
     res.status(500).json({
-      sistema: 'SOAP',
+      sistema: 'SOAP + Rest',
       error: 'Falha crítica no processamento',
       details: error.message,
       recovery_suggestion: 'Verifique os logs do serviço SOAP'
