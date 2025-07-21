@@ -10,12 +10,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "axios": "^1.10.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.5",
-    "soap": "^1.1.12",
+     "express": "4.18.2",
+    "axios": "1.6.2",
+    "soap": "0.45.0",
     "strong-soap": "^4.1.14"
   }
 }

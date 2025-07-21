@@ -10,28 +10,43 @@ const PORT = 3000;
 app.use(express.json());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Content-Type, SOAPAction'
+  );
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  app.options('*', (req, res) => {
+    res.sendStatus(200);
+  });
+    next();
 });
 
 // Rota para salvar música (SOAP + REST)
 app.post('/save-music', async (req, res) => {
   try {
-    // 1. Chamar serviço SOAP
+    // 1. Garante o salvamento no SOAP
     const soapResult = await callSoapService(req.body);
     
-    // 2. Enviar para Django REST
-    const restResponse = await axios.post('http://localhost:8000/api/musica/', {
-      nome: soapResult.name,
-      autor: soapResult.artist,
-      link: soapResult.link
+    // 2. Verifica se o SOAP realmente salvou
+    if (!soapResult.dados || !soapResult.dados.id) {
+      throw new Error('Falha ao verificar salvamento no SOAP');
+    }
+    
+    // 3. Retorna resposta consolidada
+    res.json({
+      sistema: 'SOAP',
+      status: 'Música processada com sucesso',
+      id_musica: soapResult.dados.id,
+      aviso: 'O envio ao Django é assíncrono e pode demorar'
     });
     
-    // 3. Responder ao frontend
-    res.json(restResponse.data);
   } catch (error) {
-    console.error('Erro no gateway:', error.message);
-    res.status(500).json({ error: 'Falha no gateway', details: error.message });
+    res.status(500).json({
+      sistema: 'SOAP',
+      error: 'Falha crítica no processamento',
+      details: error.message,
+      recovery_suggestion: 'Verifique os logs do serviço SOAP'
+    });
   }
 });
 
@@ -70,14 +85,30 @@ app.get('/imagem', async (req, res) => {
 // Função para chamar serviço SOAP
 async function callSoapService(data) {
   return new Promise((resolve, reject) => {
-    createClient('http://localhost:9000/music?wsdl', (err, client) => {
-      if (err) return reject(err);
-      
-      client.MusicService.MusicPort.GetMusic(data, (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
-    });
+    console.log('Conectando ao WSDL...');
+    createClient('http://localhost:9000/music?wsdl', 
+      { disableCache: true }, // Adicione esta opção
+      (err, client) => {
+        if (err) {
+          console.error('Erro ao criar cliente SOAP:', err);
+          return reject(new Error('Serviço SOAP indisponível'));
+        }
+
+        console.log('Chamando método GetMusic...');
+        client.MusicService.MusicPort.GetMusic({
+          name: data.musica,
+          artist: data.artista,
+          link: data.link
+        }, (err, result) => {
+          if (err) {
+            console.error('Erro na chamada SOAP:', err);
+            return reject(new Error('Falha ao processar música'));
+          }
+          console.log('Resposta SOAP:', result);
+          resolve(result);
+        });
+      }
+    );
   });
 }
 

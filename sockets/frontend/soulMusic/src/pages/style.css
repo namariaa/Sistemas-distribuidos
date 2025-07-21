@@ -392,6 +392,7 @@ body {
   font-family: "Maxima Nouva", sans-serif;
 }
 
+
 .foto-section {
   position: relative; /* Container para a neve */
   width: 100%;
@@ -400,15 +401,18 @@ body {
 }
 
 .cartao{
-    padding: 50px;
+
     width: 462px;
     color: #ffffff;
 }
 .cartao h2{
   color: white;
+  margin: 0;
+  padding: 0;
 }
 .conteudo{
     display: flex;
+    padding-bottom: 80px;
     justify-content: space-between;
 }
 .card{

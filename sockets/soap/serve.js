@@ -1,32 +1,49 @@
 const soap = require('soap');
+const fs = require('fs');
+const http = require('http');
+const path = require('path');
+
 
 const service = {
-  MusicService: {
-    MusicPort: {
-      GetMusic: function(args, callback) {
-        const name = args.name;
-        const artist = args.artist;
-        const link = args.link;
-        const result = {
-          name: name,
-          artist: artist,
-          link : link
-        };
-        callback(null, result);
-      }
+    MusicService: {
+        MusicPort: {
+            GetMusic: function(args) {
+                return {
+                    name: args.name,
+                    artist: args.artist,
+                    link: args.link
+                };
+            }
+        }
     }
-  }
 };
 
-const server =  require('http').createServer(function (request, response) {
-  response.end('404: Not Found');
+const xml = fs.readFileSync(path.join(__dirname, 'musicService.wsdl'), 'utf8');
+const server = http.createServer((request, response) => {
+    response.end('404: Not Found');
 });
 
+try {
+    soap.listen(server, {
+        path: '/music',
+        services: service,
+        xml: xml,
+        // 5. Opções importantes
+        wsdlOptions: {
+            escapeXML: false,
+            returnFault: true
+        }
+    }, function(err) {
+        if (err) {
+            console.error('Erro ao iniciar servidor SOAP:', err);
+            process.exit(1);
+        }
+        console.log('Servidor SOAP inicializado com sucesso');
+    });
+} catch (err) {
+    process.exit(1);
+}
 
-const xml = require('fs').readFileSync('musicService.wsdl', 'utf8');
-
-soap.listen(server, '/music', service, xml);
-
-server.listen(9000, function () {
-  console.log('SOAP server running at http://localhost:9000');
+server.listen(9000, function() {
+    console.log('Servidor SOAP rodando em http://localhost:9000/music?wsdl');
 });

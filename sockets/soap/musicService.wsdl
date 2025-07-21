@@ -1,65 +1,63 @@
 <definitions name="MusicService"
-  targetNamespace="http://localhost:9000/music"
-  xmlns:tns="http://example.com/music"
-  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    targetNamespace="http://example.com/music"
+    xmlns:tns="http://example.com/music"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://schemas.xmlsoap.org/wsdl/">
 
-  <types>
-    <xsd:schema>
-      <xsd:element name="GetMusicRequest">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element name="name" type="xsd:string"/>
-             <xsd:element name="artist" type="xsd:string"/>
-              <xsd:element name="link" type="xsd:string"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-      <xsd:element name="GetMusicResponse">
-        <xsd:complexType>
-          <xsd:sequence>
-              <xsd:element name="name" type="xsd:string"/>
-              <xsd:element name="artist" type="xsd:string"/>
-              <xsd:element name="link" type="xsd:string"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-    </xsd:schema>
-  </types>
+    <types>
+        <xsd:schema targetNamespace="http://example.com/music">
+            <xsd:element name="GetMusicRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" type="xsd:string"/>
+                        <xsd:element name="artist" type="xsd:string"/>
+                        <xsd:element name="link" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="GetMusicResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" type="xsd:string"/>
+                        <xsd:element name="artist" type="xsd:string"/>
+                        <xsd:element name="link" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
 
-  <message name="GetMusicRequestMessage">
-    <part name="request" element="tns:GetMusicRequest"/>
-  </message>
-  <message name="GetMusicResponseMessage">
-    <part name="response" element="tns:GetMusicResponse"/>
-  </message>
+    <message name="GetMusicRequest">
+        <part name="parameters" element="tns:GetMusicRequest"/>
+    </message>
+    <message name="GetMusicResponse">
+        <part name="parameters" element="tns:GetMusicResponse"/>
+    </message>
 
-  <portType name="MusicPortType">
-    <operation name="GetMusic">
-      <input message="tns:GetMusicRequestMessage"/>
-      <output message="tns:GetMusicResponseMessage"/>
-    </operation>
-  </portType>
+    <portType name="MusicPortType">
+        <operation name="GetMusic">
+            <input message="tns:GetMusicRequest"/>
+            <output message="tns:GetMusicResponse"/>
+        </operation>
+    </portType>
 
-  <binding name="MusicBinding" type="tns:MusicPortType">
-    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <operation name="GetMusic">
-      <soap:operation soapAction="http://example.com/music/GetMusic"/>
-      <input>
-        <soap:body use="encoded" namespace="http://example.com/music"
-          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
-      </input>
-      <output>
-        <soap:body use="encoded" namespace="http://example.com/music"
-          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
-      </output>
-    </operation>
-  </binding>
+    <binding name="MusicBinding" type="tns:MusicPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="GetMusic">
+            <soap:operation soapAction="http://example.com/music/GetMusic"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
 
-  <service name="MusicService">
-    <port name="MusicPort" binding="tns:MusicBinding">
-      <soap:address location="http://localhost:9000/music"/>
-    </port>
-  </service>
-
+    <service name="MusicService">
+        <port name="MusicPort" binding="tns:MusicBinding">
+            <soap:address location="http://localhost:9000/music"/>
+        </port>
+    </service>
 </definitions>

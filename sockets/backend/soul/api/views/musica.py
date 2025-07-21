@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from pytubefix import YouTube
 from pytubefix.cli import on_progress
 from datetime import date
+from rest_framework.decorators import api_view
 
 
 class MusicaViewSet(viewsets.ViewSet):
@@ -21,6 +22,18 @@ class MusicaViewSet(viewsets.ViewSet):
     # serializer_class = MusicaReadSerializer
     # permission_classes = [] para caso tiver papel
 
+    @api_view(['POST'])
+    def create_from_soap(request):
+        try:
+            musica = Musica.objects.create(
+                nome=request.data.get('nome'),
+                autor=request.data.get('autor'),
+                link=request.data.get('link')
+            )
+            return Response({'status': 'success', 'id': musica.id})
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=400)
+        
     @action(
         detail=False, methods=["get"]
     )  # Para criar métodos já que estou usando ModelViewSet que já é pronto

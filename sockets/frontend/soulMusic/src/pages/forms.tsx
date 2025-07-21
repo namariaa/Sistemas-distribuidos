@@ -15,35 +15,23 @@ function Forms() {
     artista: string;
     link: string;
   }) => {
-    console.log(data);
-
-    const soapBody = `
-      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:mus="http://example.com/music">
-        <soapenv:Header/>
-        <soapenv:Body>
-          <mus:GetMusic>
-            <name>${data.musica}</name>
-            <artist>${data.artista}</artist>
-            <link>${data.link}</link>
-          </mus:GetMusic>
-        </soapenv:Body>
-      </soapenv:Envelope>
-    `;
-
-    try {
-      const res = await fetch("http://localhost:8000/music", {
+      try {
+      const res = await fetch("http://localhost:3000/save-music", {
         method: "POST",
         headers: {
-          "Content-Type": "text/xml;charset=UTF-8",
-          SOAPAction: "http://example.com/music/GetMusic",
+          "Content-Type": "application/json", 
         },
-        body: soapBody,
-      });
+        body: JSON.stringify({
+          musica: data.musica,
+          artista: data.artista,
+          link: data.link
+        }),
+    });
 
-      const text = await res.text();
-      console.log(text);
+    const text = await res.text();
+    console.log("Texto",text);
     } catch (error) {
-      console.error("Erro ao chamar SOAP:", error);
+      console.error("Erro ao chamar gateway:", error);
     }
   };
 
@@ -55,7 +43,7 @@ function Forms() {
 
   return (
     <section>
-      <div className="conteudo container-lg">
+      <div className="conteudo">
         <form onSubmit={handleSubmit(Conferir)}>
           <div className="cartao">
             <h2>Escolha uma música</h2>
