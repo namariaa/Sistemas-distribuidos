@@ -31,13 +31,7 @@ class MusicaViewSet(viewsets.ViewSet):
         hoje = date.today()
         musica_atual = MusicaAtual.objects.filter(data_atual=hoje).first()
         if not musica_atual:
-            musicas = Musica.objects.all()
-            if not musicas.exists():
-                return Response(
-                    {"erro": "Nenhuma música disponível no banco de dados."},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-            random_music = musicas.order_by("?").first()
+            random_music = Musica.objects.order_by("?")[0]
             MusicaAtual.objects.create(musica=random_music)
         else:
             random_music = musica_atual.musica

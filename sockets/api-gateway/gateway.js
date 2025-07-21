@@ -73,13 +73,14 @@ async function callSoapService(data) {
     createClient('http://localhost:9000/music?wsdl', (err, client) => {
       if (err) return reject(err);
       
-      client.GetMusic(data, (err, result) => {
+      client.MusicService.MusicPort.GetMusic(data, (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
     });
   });
 }
+
 
 app.listen(PORT, () => {
   console.log(`Gateway rodando em http://localhost:${PORT}`);

@@ -1,4 +1,4 @@
-<definitions name="musicService"
+<definitions name="MusicService"
   targetNamespace="http://localhost:9000/music"
   xmlns:tns="http://example.com/music"
   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -34,7 +34,7 @@
     <part name="response" element="tns:GetMusicResponse"/>
   </message>
 
-  <portType name="musicPortType">
+  <portType name="MusicPortType">
     <operation name="GetMusic">
       <input message="tns:GetMusicRequestMessage"/>
       <output message="tns:GetMusicResponseMessage"/>
@@ -46,18 +46,18 @@
     <operation name="GetMusic">
       <soap:operation soapAction="http://example.com/music/GetMusic"/>
       <input>
-        <soap:body use="encoded" namespace="http://example.com/weather"
+        <soap:body use="encoded" namespace="http://example.com/music"
           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
       </input>
       <output>
-        <soap:body use="encoded" namespace="http://example.com/weather"
+        <soap:body use="encoded" namespace="http://example.com/music"
           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
       </output>
     </operation>
   </binding>
 
   <service name="MusicService">
-    <port name="musicPort" binding="tns:MusicBinding">
+    <port name="MusicPort" binding="tns:MusicBinding">
       <soap:address location="http://localhost:9000/music"/>
     </port>
   </service>
