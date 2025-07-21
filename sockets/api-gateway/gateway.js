@@ -23,7 +23,7 @@ app.post('/save-music', async (req, res) => {
     // 2. Enviar para Django REST
     const restResponse = await axios.post('http://localhost:8000/api/musica/', {
       nome: soapResult.name,
-      artista: soapResult.artist,
+      autor: soapResult.artist,
       link: soapResult.link
     });
     
