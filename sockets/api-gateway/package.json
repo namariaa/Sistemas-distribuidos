@@ -15,6 +15,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.5",
+    "soap": "^1.1.12",
     "strong-soap": "^4.1.14"
   }
 }

@@ -1,5 +1,5 @@
 <definitions name="musicService"
-  targetNamespace="http://localhost:8000/music"
+  targetNamespace="http://localhost:9000/music"
   xmlns:tns="http://example.com/music"
   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -58,7 +58,7 @@
 
   <service name="MusicService">
     <port name="musicPort" binding="tns:MusicBinding">
-      <soap:address location="http://example.com/music"/>
+      <soap:address location="http://localhost:9000/music"/>
     </port>
   </service>
 

@@ -1,24 +1,86 @@
-const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
-const bodyParser = require("body-parser");
-const cors = require("cors");
+// gateway.js
+const express = require('express');
+const axios = require('axios');
+const { createClient } = require('soap');
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+const PORT = 3000;
 
-// Proxy para o backend Django REST
-app.use("/api/music", createProxyMiddleware({
-  target: "http://localhost:8000",
-  changeOrigin: true,
-}));
+// Middleware básico
+app.use(express.json());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
-// Proxy para o backend SOAP 
-app.use("/api/music-soap", createProxyMiddleware({
-  target: "http://localhost:9000", 
-  changeOrigin: true,
-}));
+// Rota para salvar música (SOAP + REST)
+app.post('/save-music', async (req, res) => {
+  try {
+    // 1. Chamar serviço SOAP
+    const soapResult = await callSoapService(req.body);
+    
+    // 2. Enviar para Django REST
+    const restResponse = await axios.post('http://localhost:8000/api/musica/', {
+      nome: soapResult.name,
+      artista: soapResult.artist,
+      link: soapResult.link
+    });
+    
+    // 3. Responder ao frontend
+    res.json(restResponse.data);
+  } catch (error) {
+    console.error('Erro no gateway:', error.message);
+    res.status(500).json({ error: 'Falha no gateway', details: error.message });
+  }
+});
 
-app.listen(3000, () => {
-  console.log("API Gateway rodando em http://localhost:3000");
+// Rota para download (proxy direto)
+app.get('/download', async (req, res) => {
+  try {
+    const response = await axios.get('http://localhost:8000/api/musica/download/', {
+      responseType: 'stream'
+    });
+    
+    // Repassar headers importantes
+    res.setHeader('Content-Type', response.headers['content-type']);
+    res.setHeader('Content-Disposition', response.headers['content-disposition']);
+    res.setHeader('nome_musica', response.headers['nome_musica'] || '');
+    res.setHeader('nome_autor', response.headers['nome_autor'] || '');
+    
+    // Repassar o stream de dados
+    response.data.pipe(res);
+  } catch (error) {
+    console.error('Erro no download:', error.message);
+    res.status(500).json({ error: 'Falha no download', details: error.message });
+  }
+});
+
+// Rota para imagem (proxy direto)
+app.get('/imagem', async (req, res) => {
+  try {
+    const response = await axios.get('http://localhost:8000/api/musica/imagem/');
+    res.json(response.data);
+  } catch (error) {
+    console.error('Erro na imagem:', error.message);
+    res.status(500).json({ error: 'Falha ao obter imagem', details: error.message });
+  }
+});
+
+// Função para chamar serviço SOAP
+async function callSoapService(data) {
+  return new Promise((resolve, reject) => {
+    createClient('http://localhost:9000/music?wsdl', (err, client) => {
+      if (err) return reject(err);
+      
+      client.GetMusic(data, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+  });
+}
+
+app.listen(PORT, () => {
+  console.log(`Gateway rodando em http://localhost:${PORT}`);
 });

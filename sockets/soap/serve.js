@@ -27,6 +27,6 @@ const xml = require('fs').readFileSync('musicService.wsdl', 'utf8');
 
 soap.listen(server, '/music', service, xml);
 
-server.listen(8000, function () {
+server.listen(9000, function () {
   console.log('SOAP server running at http://localhost:9000');
 });
