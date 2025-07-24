@@ -80,11 +80,11 @@ const Musica: React.FC = () => {
   async function getMusica() {
     try {
       setIsLoading(true);
-      const [musicaResponse, imagemResponse] = await Promise.all([
+      const [musicaResponse] = await Promise.all([
         MusicaService.downloadMusica(),
-        MusicaService.getMusicaImagem(),
       ]);
 
+      
       const audioBlob = new Blob([musicaResponse.data], { type: "audio/mpeg" });
       const audioUrl = URL.createObjectURL(audioBlob);
       setCurrentMusic(audioUrl);
@@ -92,7 +92,6 @@ const Musica: React.FC = () => {
       setInfoMusica({
         nomeMusica: musicaResponse.headers["nome_musica"],
         nomeAutor: musicaResponse.headers["nome_autor"],
-        imagem: imagemResponse.data?.imagem_base64,
       });
     } catch (error) {
       console.error("Erro ao carregar música ou imagem:", error);

@@ -84,17 +84,6 @@ app.get('/download', async (req, res) => {
   }
 });
 
-// Rota para imagem (proxy direto)
-app.get('/imagem', async (req, res) => {
-  try {
-    const response = await axios.get('http://localhost:8000/api/musica/imagem/');
-    res.json(response.data);
-  } catch (error) {
-    console.error('Erro na imagem:', error.message);
-    res.status(500).json({ error: 'Falha ao obter imagem', details: error.message });
-  }
-});
-
 // Função para chamar serviço SOAP
 async function callSoapService(data) {
   return new Promise((resolve, reject) => {
@@ -124,8 +113,6 @@ async function callSoapService(data) {
     );
   });
 }
-
-
 app.listen(PORT, () => {
   console.log(`Gateway rodando em http://localhost:${PORT}`);
 });

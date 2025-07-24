@@ -47,20 +47,3 @@ class MusicaViewSet(viewsets.ModelViewSet):
         response["Delete-After-Send"] = "true"
 
         return response
-
-    @action(detail=False, methods=["get"])
-    def imagem(self, request):
-        hoje = date.today()
-        musica_atual = MusicaAtual.objects.filter(data_atual=hoje).first()
-
-        if not musica_atual:
-            return Response(
-                {
-                    "error": "Nenhuma música encontrada para hoje ou imagem não disponível"
-                },
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        with open(musica_atual.musica.imagem.path, "rb") as img_file:
-            imagem_base64 = base64.b64encode(img_file.read()).decode("utf-8")
-            return Response({"imagem_base64": imagem_base64}, status=status.HTTP_200_OK)
