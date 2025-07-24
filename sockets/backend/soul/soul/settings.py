@@ -151,7 +151,8 @@ ALLOWED_HOSTS = [
     "api-soul.koyeb.app",
     "localhost",
     "127.0.0.1",
-    "localhost:5173"
+    "localhost:5173",
+    "10.25.2.165"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
