@@ -31,8 +31,6 @@ app.post('/save-music', async (req, res) => {
     if (!soapResult.dados || !soapResult.dados.id) {
       throw new Error('Falha ao verificar salvamento no SOAP');
     }
-
-    
     
     const restResult = await axios.post(
       'http://localhost:8000/api/musica/',
@@ -69,20 +67,20 @@ app.get('/download', async (req, res) => {
     const response = await axios.get('http://localhost:8000/api/musica/download/', {
       responseType: 'stream'
     });
-    
-    // Repassar headers importantes
+
     res.setHeader('Content-Type', response.headers['content-type']);
     res.setHeader('Content-Disposition', response.headers['content-disposition']);
     res.setHeader('nome_musica', response.headers['nome_musica'] || '');
     res.setHeader('nome_autor', response.headers['nome_autor'] || '');
-    
-    // Repassar o stream de dados
+    res.setHeader('Access-Control-Expose-Headers', 'nome_musica, nome_autor');
+
     response.data.pipe(res);
   } catch (error) {
     console.error('Erro no download:', error.message);
     res.status(500).json({ error: 'Falha no download', details: error.message });
   }
 });
+
 
 // Função para chamar serviço SOAP
 async function callSoapService(data) {

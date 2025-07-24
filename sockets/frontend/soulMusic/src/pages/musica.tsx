@@ -78,33 +78,39 @@ const Musica: React.FC = () => {
   };
 
   async function getMusica() {
-    try {
-      setIsLoading(true);
-      const [musicaResponse] = await Promise.all([
-        MusicaService.downloadMusica(),
-      ]);
+  try {
+    setIsLoading(true);
+    console.log("CHAMNDO");
+    
+    const musicaResponse = await MusicaService.downloadMusica();
+    console.log(musicaResponse);
+    
 
-      
-      const audioBlob = new Blob([musicaResponse.data], { type: "audio/mpeg" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      setCurrentMusic(audioUrl);
-
-      setInfoMusica({
-        nomeMusica: musicaResponse.headers["nome_musica"],
-        nomeAutor: musicaResponse.headers["nome_autor"],
-      });
-    } catch (error) {
-      console.error("Erro ao carregar música ou imagem:", error);
-    } finally {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-    }
+    // Blob de vídeo .mp4
+    const videoBlob = new Blob([musicaResponse.data], { type: "video/mp4" });
+    const videoUrl = URL.createObjectURL(videoBlob);
+    setCurrentMusic(videoUrl);
+    setInfoMusica({
+      nomeMusica: musicaResponse.headers["nome_musica"],
+      nomeAutor: musicaResponse.headers["nome_autor"],
+    });
+    
+  } catch (error) {
+    console.error("Erro ao carregar música ou vídeo:", error);
+  } finally {
+    setIsLoading(false);
+    
   }
+}
 
   useEffect(() => {
-    getMusica();
-  }, []);
+    
+    if (infoMusica == undefined){
+      getMusica();
+      console.log(infoMusica?.nomeAutor == undefined);
+    }
+    
+  });
 
   return (
     <div className="foto-section">

@@ -5,7 +5,7 @@ class MusicaService {
 
   static async downloadMusica() {
     try {
-      const response = await axiosInstance.get(`${this.baseUrl}/download/`, {
+      const response = await axiosInstance.get(`http://localhost:3000/download/`, {
         responseType: "blob",
       });
       return response;
