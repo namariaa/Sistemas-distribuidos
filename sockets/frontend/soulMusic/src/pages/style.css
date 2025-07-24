@@ -138,12 +138,14 @@
   font-size: 2.5rem;
   margin: 0;
   font-weight: 700;
+  color: white;
 }
 
 .musica-artista {
   font-size: 1.5rem;
   margin: 0;
   font-weight: 400;
+  color: white;
 }
 
 @media (max-width: 920px) {

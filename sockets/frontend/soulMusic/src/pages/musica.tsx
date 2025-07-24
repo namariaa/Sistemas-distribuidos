@@ -2,6 +2,7 @@ import "./style.css";
 import Logo from "../assets/marca-branca.svg";
 import React, { useState, useRef, useEffect } from "react";
 import diskImage from "./assets/disk.png";
+import capa from "./assets/capa.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlay,
@@ -78,39 +79,31 @@ const Musica: React.FC = () => {
   };
 
   async function getMusica() {
-  try {
-    setIsLoading(true);
-    console.log("CHAMNDO");
-    
-    const musicaResponse = await MusicaService.downloadMusica();
-    console.log(musicaResponse);
-    
+    try {
+      setIsLoading(true);
 
-    // Blob de vídeo .mp4
-    const videoBlob = new Blob([musicaResponse.data], { type: "video/mp4" });
-    const videoUrl = URL.createObjectURL(videoBlob);
-    setCurrentMusic(videoUrl);
-    setInfoMusica({
-      nomeMusica: musicaResponse.headers["nome_musica"],
-      nomeAutor: musicaResponse.headers["nome_autor"],
-    });
-    
-  } catch (error) {
-    console.error("Erro ao carregar música ou vídeo:", error);
-  } finally {
-    setIsLoading(false);
-    
+      const musicaResponse = await MusicaService.downloadMusica();
+      console.log(musicaResponse);
+
+      const videoBlob = new Blob([musicaResponse.data], { type: "video/mp4" });
+      const videoUrl = URL.createObjectURL(videoBlob);
+      setCurrentMusic(videoUrl);
+      setInfoMusica({
+        nomeMusica: musicaResponse.headers["nome_musica"],
+        nomeAutor: musicaResponse.headers["nome_autor"],
+      });
+    } catch (error) {
+      console.error("Erro ao carregar música ou vídeo:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
-}
 
   useEffect(() => {
-    
-    if (infoMusica == undefined){
+    if (infoMusica == undefined) {
       getMusica();
-      console.log(infoMusica?.nomeAutor == undefined);
     }
-    
-  });
+  }, [infoMusica]);
 
   return (
     <div className="foto-section">
@@ -142,17 +135,10 @@ const Musica: React.FC = () => {
             </div>
             <div className="capa-container">
               {infoMusica?.imagem ? (
-                <img
-                  src={`data:image/jpeg;base64,${infoMusica.imagem}`}
-                  alt="Capa do álbum"
-                  className="capa-imagem"
-                />
+                <img src={capa} alt="Capa do álbum" className="capa-imagem" />
               ) : (
                 <div className="placeholder-imagem">
-                  <FontAwesomeIcon
-                    icon={faImage}
-                    style={{ fontSize: "48px", color: "#999999" }}
-                  />
+                  <img src={capa} alt="Capa do álbum" className="capa-imagem" />
                 </div>
               )}
             </div>
