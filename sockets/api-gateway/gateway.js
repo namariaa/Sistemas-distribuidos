@@ -1,11 +1,30 @@
 const express = require('express');
 const axios = require('axios');
 const { createClient } = require('soap');
+const amqp = require('amqplib');
 
 const app = express();
 const PORT = 3000;
 
 const REST_API_BASE = 'http://127.0.0.1:8000/api/'; 
+const RABBITMQ_URL = 'amqp://localhost';
+const QUEUE_NAME = 'music_processing';
+
+// Configuração do RabbitMQ
+let rabbitChannel;
+async function setupRabbitMQ() {
+  try {
+    const connection = await amqp.connect(RABBITMQ_URL);
+    rabbitChannel = await connection.createChannel();
+    await rabbitChannel.assertQueue(QUEUE_NAME, { durable: true });
+    console.log('Conectado ao RabbitMQ');
+    startConsumer();
+  } catch (error) {
+    console.error('Erro ao conectar ao RabbitMQ:', error);
+  }
+}
+
+setupRabbitMQ();
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -18,35 +37,64 @@ app.use((req, res, next) => {
 
 app.post('/save-music', async (req, res) => {
   try {
-    const soapResult = await callSoapService(req.body);
-    
-    if (!soapResult?.dados?.id) {
-      throw new Error('Resposta inválida do SOAP');
-    }
+    const message = {
+      musicData: req.body,
+      timestamp: new Date().toISOString()
+    };
 
-    const restResult = await callRestService('musica/', 'POST', {
-      nome: soapResult.dados.name || req.body.musica,
-      autor: soapResult.dados.artist || req.body.artista,
-      link: soapResult.dados.link || req.body.link
-    });
+    await rabbitChannel.sendToQueue(
+      QUEUE_NAME,
+      Buffer.from(JSON.stringify(message)),
+      { persistent: true }
+    );
 
-    res.json({
-      sistema: 'SOAP + REST',
-      status: 'Música processada com sucesso',
-      id_musica: restResult.id,
-      aviso: 'Download disponível em /download',
+    res.status(202).json({
+      status: 'Música enfileirada para processamento',
+      message: 'Você será notificado quando o processamento estiver completo'
     });
-    
   } catch (error) {
-    console.error('Erro completo:', error);
+    console.error('Erro ao enfileirar:', error);
     res.status(500).json({
-      error: 'Falha no processamento',
-      details: error.message,
-      ...(error.details && { rest_details: error.details }),
-      ...(error.response && { soap_details: error.response })
+      error: 'Falha ao enfileirar música',
+      details: error.message
     });
   }
 });
+
+// Consumidor
+async function startConsumer() {
+  console.log('Iniciando consumidor...');
+
+  await rabbitChannel.prefetch(1);
+  
+  rabbitChannel.consume(QUEUE_NAME, async (msg) => {
+    if (msg) {
+      try {
+        const { musicData } = JSON.parse(msg.content.toString());
+        console.log(`Processando música: ${musicData.musica}`);
+ 
+        const soapResult = await callSoapService(musicData);
+        
+        if (!soapResult?.dados?.id) {
+          throw new Error('Resposta inválida do SOAP');
+        }
+
+        const restResult = await callRestService('musica/', 'POST', {
+          nome: soapResult.dados.name || musicData.musica,
+          autor: soapResult.dados.artist || musicData.artista,
+          link: soapResult.dados.link || musicData.link
+        });
+
+        console.log(`Música processada: ID ${restResult.id}`);
+        rabbitChannel.ack(msg);
+      } catch (error) {
+        console.error('Erro ao processar mensagem:', error);
+        rabbitChannel.nack(msg, false, false);
+      }
+    }
+  });
+}
+
 
 app.get('/download', async (req, res) => {
   try {
