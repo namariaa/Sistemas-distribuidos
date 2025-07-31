@@ -1,193 +1,177 @@
 import "./style.css";
-import Logo from "../assets/marca-branca.svg";
 import React, { useState, useRef, useEffect } from "react";
 import diskImage from "./assets/disk.png";
 import capa from "./assets/capa.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlay,
-  type IconDefinition,
-  faImage,
   faPause,
   faVolumeHigh,
   faVolumeMute,
-  faVolumeDown,
+  faStepForward,
+  faStepBackward
 } from "@fortawesome/free-solid-svg-icons";
-import type { MusicaModel } from "./interfaces/musica";
-import MusicaService from "../service/MusicaService";
 import Forms from "./forms";
 
+interface MusicaNaFila {
+  id: string;
+  musica: string;
+  artista: string;
+  link: string;
+}
+
 const Musica: React.FC = () => {
+  // Estados do player
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [lastVolume, setLastVolume] = useState(1);
-  const [infoMusica, setInfoMusica] = useState<MusicaModel>();
-  const [iconMusicActive, setIconMusicActive] = useState(faVolumeHigh);
-  const [CurrentMusic, setCurrentMusic] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [volume, setVolume] = useState(0.7);
+  const [isMuted, setIsMuted] = useState(false);
+  
+  // Estados da playlist
+  const [playlist, setPlaylist] = useState<MusicaNaFila[]>([]);
+  const [currentMusicIndex, setCurrentMusicIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  function getIconFromVolume(value: number): IconDefinition {
-    if (value > 0.5) {
-      return faVolumeHigh;
-    } else if (value > 0 && value <= 0.5) {
-      return faVolumeDown;
-    }
-    return faVolumeMute;
-  }
-
-  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(event.target.value);
-    setVolume(newVolume);
-    setIconMusicActive(getIconFromVolume(newVolume));
-
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-    }
-
-    if (newVolume > 0) {
-      setLastVolume(newVolume);
+  // Adiciona música à fila (chamado pelo Forms)
+  const adicionarNaFila = (novaMusica: Omit<MusicaNaFila, 'id'>) => {
+    const musicaComId = {
+      ...novaMusica,
+      id: Date.now().toString() // ID único simples
+    };
+    
+    setPlaylist(prev => [...prev, musicaComId]);
+    
+    // Se for a primeira música, já começa a tocar
+    if (playlist.length === 0) {
+      setCurrentMusicIndex(0);
     }
   };
 
-  const toggleButtonVolume = () => {
-    if (volume > 0) {
-      setLastVolume(volume);
-      setVolume(0);
-      setIconMusicActive(faVolumeMute);
-      if (audioRef.current) {
-        audioRef.current.volume = 0;
-      }
+  // Controles do player
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
     } else {
-      setVolume(lastVolume);
-      setIconMusicActive(getIconFromVolume(lastVolume));
-      if (audioRef.current) {
-        audioRef.current.volume = lastVolume;
-      }
+      audioRef.current.play();
     }
+    setIsPlaying(!isPlaying);
   };
 
-  const togglePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
+  const toggleMute = () => {
+    if (!audioRef.current) return;
+    
+    audioRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
   };
 
-  async function getMusica() {
-    try {
-      setIsLoading(true);
+  const playNext = () => {
+    if (playlist.length === 0) return;
+    
+    const nextIndex = (currentMusicIndex + 1) % playlist.length;
+    setCurrentMusicIndex(nextIndex);
+  };
 
-      const musicaResponse = await MusicaService.downloadMusica();
-      console.log(musicaResponse);
+  const playPrevious = () => {
+    if (playlist.length === 0) return;
+    
+    const prevIndex = (currentMusicIndex - 1 + playlist.length) % playlist.length;
+    setCurrentMusicIndex(prevIndex);
+  };
 
-      const videoBlob = new Blob([musicaResponse.data], { type: "video/mp4" });
-      const videoUrl = URL.createObjectURL(videoBlob);
-      setCurrentMusic(videoUrl);
-      setInfoMusica({
-        nomeMusica: musicaResponse.headers["nome_musica"],
-        nomeAutor: musicaResponse.headers["nome_autor"],
-      });
-    } catch (error) {
-      console.error("Erro ao carregar música ou vídeo:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
+  // Efeito para carregar a música atual
   useEffect(() => {
-    if (infoMusica == undefined) {
-      getMusica();
+    if (playlist.length === 0 || !audioRef.current) return;
+    
+    const musicaAtual = playlist[currentMusicIndex];
+    setIsLoading(true);
+    
+    // Aqui você pode processar o link do YouTube se necessário
+    // Por enquanto, vamos usar o link diretamente (assumindo que já é um link de áudio)
+    audioRef.current.src = musicaAtual.link;
+    
+    if (isPlaying) {
+      audioRef.current.play()
+        .catch(error => console.error("Erro ao reproduzir:", error));
     }
-  }, [infoMusica]);
+    
+    setIsLoading(false);
+    
+  }, [currentMusicIndex, playlist]);
 
   return (
-    <div className="foto-section">
-      <div className="scroll-container">
-        <section
-          className="section"
-          style={{ backgroundColor: "#1D203E" }}
-          id="musica"
-        >
-          <header className="header">
-            <div className="logo">
-              <img src={Logo} alt="Logo" />
-            </div>
-          </header>
-          <Forms />
-          {isLoading && (
-            <div className="loading-overlay">
-              <div className="loading-spinner"></div>
-            </div>
-          )}
-
-          <div className="musica-container">
-            <div className="disco-container">
-              <img
-                src={diskImage}
-                alt="Disco de vinil"
-                className={`disco-imagem ${isPlaying ? "playing" : ""}`}
-              />
-            </div>
-            <div className="capa-container">
-              {infoMusica?.imagem ? (
-                <img src={capa} alt="Capa do álbum" className="capa-imagem" />
-              ) : (
-                <div className="placeholder-imagem">
-                  <img src={capa} alt="Capa do álbum" className="capa-imagem" />
-                </div>
-              )}
-            </div>
-            <div className="musica-informacoes">
-              <h1 className="musica-titulo">
-                {infoMusica?.nomeMusica ?? "Carregando música..."}
-              </h1>
-              <p className="musica-artista">
-                {infoMusica?.nomeAutor ?? "Carregando artista..."}
-              </p>
-              <div className="controls-container">
-                <button
-                  className="play-pause-button"
-                  onClick={togglePlayPause}
-                  disabled={isLoading}
-                >
-                  <FontAwesomeIcon
-                    icon={isPlaying ? faPause : faPlay}
-                    style={{ color: "black", fontSize: "20px" }}
-                  />
-                </button>
-                <div className="volume-control">
-                  <button
-                    className="volume-button"
-                    onClick={toggleButtonVolume}
-                    disabled={isLoading}
-                  >
-                    <FontAwesomeIcon
-                      icon={iconMusicActive}
-                      style={{ color: "black", fontSize: "20px" }}
-                    />
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={volume}
-                    onChange={handleVolumeChange}
-                    className="volume-slider"
-                    style={{ "--value": volume } as React.CSSProperties}
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-              {CurrentMusic && <audio ref={audioRef} src={CurrentMusic} />}
-            </div>
-          </div>
-        </section>
+    <div className="player-container">
+      <Forms onMusicSubmit={adicionarNaFila} />
+      
+      {/* Player de Música */}
+      <div className="music-player">
+        {/* Disco e Capa */}
+        <div className="cover-container">
+          <img 
+            src={diskImage} 
+            alt="Vinil" 
+            className={`vinyl ${isPlaying ? 'spinning' : ''}`} 
+          />
+          <img src={capa} alt="Capa" className="album-cover" />
+        </div>
+        
+        {/* Informações da Música */}
+        <div className="music-info">
+          <h2>
+            {playlist[currentMusicIndex]?.musica || "Nenhuma música na fila"}
+          </h2>
+          <p>
+            {playlist[currentMusicIndex]?.artista || ""}
+          </p>
+        </div>
+        
+        {/* Controles */}
+        <div className="controls">
+          <button onClick={playPrevious} disabled={playlist.length === 0}>
+            <FontAwesomeIcon icon={faStepBackward} />
+          </button>
+          
+          <button 
+            onClick={togglePlay} 
+            disabled={playlist.length === 0 || isLoading}
+          >
+            <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+          </button>
+          
+          <button onClick={playNext} disabled={playlist.length === 0}>
+            <FontAwesomeIcon icon={faStepForward} />
+          </button>
+          
+          <button onClick={toggleMute}>
+            <FontAwesomeIcon icon={isMuted ? faVolumeMute : faVolumeHigh} />
+          </button>
+        </div>
+        
+        {/* Player de áudio invisível */}
+        <audio 
+          ref={audioRef} 
+          onEnded={playNext}
+          volume={volume}
+        />
+      </div>
+      
+      {/* Lista de Reprodução */}
+      <div className="playlist">
+        <h3>Fila de Reprodução ({playlist.length})</h3>
+        <ul>
+          {playlist.map((musica, index) => (
+            <li 
+              key={musica.id}
+              className={index === currentMusicIndex ? 'active' : ''}
+              onClick={() => setCurrentMusicIndex(index)}
+            >
+              {musica.musica} - {musica.artista}
+              {index === currentMusicIndex && isLoading && " (carregando...)"}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
