@@ -10,6 +10,7 @@
             <xsd:element name="GetMusicRequest">
                 <xsd:complexType>
                     <xsd:sequence>
+                        <xsd:element name="id" type="xsd:string"/>
                         <xsd:element name="name" type="xsd:string"/>
                         <xsd:element name="artist" type="xsd:string"/>
                         <xsd:element name="link" type="xsd:string"/>
@@ -19,6 +20,7 @@
             <xsd:element name="GetMusicResponse">
                 <xsd:complexType>
                     <xsd:sequence>
+                        <xsd:element name="id" type="xsd:string"/>
                         <xsd:element name="name" type="xsd:string"/>
                         <xsd:element name="artist" type="xsd:string"/>
                         <xsd:element name="link" type="xsd:string"/>
@@ -36,7 +38,7 @@
     </message>
 
     <portType name="MusicPortType">
-        <operation name="GetMusic">
+        <operation name="StoreMusic">
             <input message="tns:GetMusicRequest"/>
             <output message="tns:GetMusicResponse"/>
         </operation>

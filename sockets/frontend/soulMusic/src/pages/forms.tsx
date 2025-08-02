@@ -16,13 +16,13 @@ function Forms() {
     link: string;
   }) => {
       try {
-      const res = await fetch("http://10.25.2.165:3000/save-music", {
+      const res = await fetch("http://localhost:3000/music", {
         method: "POST",
         headers: {
           "Content-Type": "application/json", 
         },
         body: JSON.stringify({
-          musica: data.musica,
+          nome: data.musica,
           artista: data.artista,
           link: data.link
         }),
