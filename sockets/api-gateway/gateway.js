@@ -37,14 +37,7 @@ app.post('/music', async (req, res) => {
 app.get('/music/:id', async (req, res) => {
   try {
     const { id } = req.params;
-  
-    await channel.sendToQueue(
-      QUEUE_RETRIEVE,
-      Buffer.from(JSON.stringify({ id }))
-    );
-    
-    const response = await waitForResponse(id);
-    res.json(response);
+    res.redirect(`http://localhost:8000/api/musica/${id}/download/`);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar música' });
   }

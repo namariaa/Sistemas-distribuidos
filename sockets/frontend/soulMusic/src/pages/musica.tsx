@@ -1,4 +1,3 @@
-import "./style.css";
 import React, { useState, useRef, useEffect } from "react";
 import diskImage from "./assets/disk.png";
 import capa from "./assets/capa.jpg";
@@ -29,6 +28,28 @@ const Musica: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // Função para buscar a playlist atualizada
+  const fetchPlaylist = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/musica/');
+      if (!response.ok) throw new Error('Falha ao buscar playlist');
+      const data = await response.json();
+      setPlaylist(data.map((item: any) => ({
+        id: item.id.toString(),
+        musica: item.nome,
+        artista: item.autor,
+        link: item.link
+      })));
+    } catch (error) {
+      console.error("Erro ao buscar playlist:", error);
+    }
+  };
+
+  // Carrega a playlist inicial
+  useEffect(() => {
+    fetchPlaylist();
+  }, []);
+
   const adicionarNaFila = async (novaMusica: Omit<MusicaNaFila, "id">) => {
     try {
       const response = await fetch('http://localhost:3000/music', {
@@ -39,18 +60,8 @@ const Musica: React.FC = () => {
       
       if (!response.ok) throw new Error('Falha ao adicionar música');
       
-      const data = await response.json();
-      const musicaComId = {
-        ...novaMusica,
-        id: data.id
-      };
-
-      setPlaylist(prev => [...prev, musicaComId]);
-      
-      if (playlist.length === 0) {
-        setCurrentMusicIndex(0);
-        carregarMusica(musicaComId);
-      }
+      // Atualiza a playlist após adicionar nova música
+      await fetchPlaylist();
     } catch (error) {
       console.error("Erro ao adicionar música:", error);
     }
@@ -62,7 +73,13 @@ const Musica: React.FC = () => {
     setIsLoading(true);
     try {
       const audio = audioRef.current;
-      audio.src = `http://localhost:3000/music/${musica.id}/stream`;
+      
+      // Limpa o src atual para forçar recarregamento
+      audio.src = '';
+      
+      // Cria um objeto URL para o stream de áudio
+      const audioUrl = `http://localhost:8000/api/musica/${musica.id}/download/`;
+      audio.src = audioUrl;
       
       await new Promise((resolve, reject) => {
         audio.oncanplay = resolve;
@@ -81,17 +98,24 @@ const Musica: React.FC = () => {
     }
   };
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (!audioRef.current || playlist.length === 0) return;
 
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(error => {
-        console.error("Erro ao reproduzir:", error);
-      });
+    try {
+      if (isPlaying) {
+        await audioRef.current.pause();
+      } else {
+        // Se não há música carregada ou é uma música diferente, carrega a atual
+        if (!audioRef.current.src || 
+            audioRef.current.src !== `http://localhost:8000/api/musica/${playlist[currentMusicIndex].id}/download/`) {
+          await carregarMusica(playlist[currentMusicIndex]);
+        }
+        await audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    } catch (error) {
+      console.error("Erro ao controlar reprodução:", error);
     }
-    setIsPlaying(!isPlaying);
   };
 
   const toggleMute = () => {
@@ -104,35 +128,45 @@ const Musica: React.FC = () => {
     if (playlist.length <= 1) return;
     const nextIndex = (currentMusicIndex + 1) % playlist.length;
     setCurrentMusicIndex(nextIndex);
+    carregarMusica(playlist[nextIndex]);
+    if (isPlaying) {
+      audioRef.current?.play().catch(console.error);
+    }
   };
 
   const playPrevious = () => {
     if (playlist.length <= 1) return;
     const prevIndex = (currentMusicIndex - 1 + playlist.length) % playlist.length;
     setCurrentMusicIndex(prevIndex);
+    carregarMusica(playlist[prevIndex]);
+    if (isPlaying) {
+      audioRef.current?.play().catch(console.error);
+    }
   };
 
+  // Atualiza a música quando o índice muda
   useEffect(() => {
-    if (playlist.length === 0) return;
-    carregarMusica(playlist[currentMusicIndex]);
-  }, [currentMusicIndex, playlist]);
+    if (playlist.length > 0) {
+      carregarMusica(playlist[currentMusicIndex]);
+    }
+  }, [currentMusicIndex]);
 
+  // Configura o listener para quando a música terminar
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleEnded = () => {
-      if (playlist.length > 1) playNext();
-    };
-
+    const handleEnded = () => playNext();
     audio.addEventListener('ended', handleEnded);
-    return () => audio.removeEventListener('ended', handleEnded);
-  }, [playlist]);
+    
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [playlist, currentMusicIndex]);
 
   return (
     <div className="player-container">
       <div className="player-content">
-        {/* Seção Esquerda: Formulário e Disco */}
         <div className="left-section">
           <Forms onMusicSubmit={adicionarNaFila} />
           
@@ -174,7 +208,6 @@ const Musica: React.FC = () => {
           </div>
         </div>
 
-        {/* Seção Direita: Fila de Reprodução */}
         <div className="right-section">
           <div className="playlist">
             <h3>Fila de Reprodução ({playlist.length})</h3>
@@ -196,7 +229,7 @@ const Musica: React.FC = () => {
 
       <audio 
         ref={audioRef} 
-        preload="auto"
+        preload="none"
         volume={volume}
       />
     </div>

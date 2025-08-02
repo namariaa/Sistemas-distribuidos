@@ -83,29 +83,30 @@ class MusicWorker {
     }
   }
   static async downloadFromRest(id) {
-    try {
-      const response = await axios.get(`${REST_API}/musica/download/`, {
-        responseType: 'stream',
-        headers: {
-          'Accept': 'audio/mp4',
-          'Content-Type': 'application/json'
-        },
-        timeout: 15000 
-      });
-      
-      return {
-        stream: response.data,
-        headers: {
-          contentType: response.headers['content-type'],
-          contentDisposition: response.headers['content-disposition'],
-          nomeMusica: response.headers['nome_musica'],
-          nomeAutor: response.headers['nome_autor']
-        }
-      };
-    } catch (error) {
-      throw new Error(`Falha no download: ${error.response?.statusText || error.message}`);
-    }
+  try {
+    const response = await axios.get(`http://localhost:8000/api/musica/${id}/download/`, {
+      responseType: 'stream',
+      headers: {
+        'Accept': 'audio/mp4',
+        'Content-Type': 'application/json'
+      },
+      timeout: 15000 
+    });
+    
+    return {
+      stream: response.data,
+      headers: {
+        contentType: response.headers['content-type'],
+        contentDisposition: response.headers['content-disposition'],
+        nomeMusica: response.headers['nome_musica'],
+        nomeAutor: response.headers['nome_autor']
+      }
+    };
+  } catch (error) {
+    throw new Error(`Falha no download: ${error.response?.statusText || error.message}`);
   }
+}
+
 
   static handleRetry(channel, msg) {
     const retryCount = msg.properties.headers?.['x-retry-count'] || 0;
