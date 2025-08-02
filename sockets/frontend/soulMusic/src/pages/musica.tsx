@@ -28,7 +28,6 @@ const Musica: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Função para buscar a playlist atualizada
   const fetchPlaylist = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/musica/');
@@ -59,8 +58,6 @@ const Musica: React.FC = () => {
       });
       
       if (!response.ok) throw new Error('Falha ao adicionar música');
-      
-      // Atualiza a playlist após adicionar nova música
       await fetchPlaylist();
     } catch (error) {
       console.error("Erro ao adicionar música:", error);
@@ -73,11 +70,7 @@ const Musica: React.FC = () => {
     setIsLoading(true);
     try {
       const audio = audioRef.current;
-      
-      // Limpa o src atual para forçar recarregamento
       audio.src = '';
-      
-      // Cria um objeto URL para o stream de áudio
       const audioUrl = `http://localhost:8000/api/musica/${musica.id}/download/`;
       audio.src = audioUrl;
       
@@ -105,7 +98,6 @@ const Musica: React.FC = () => {
       if (isPlaying) {
         await audioRef.current.pause();
       } else {
-        // Se não há música carregada ou é uma música diferente, carrega a atual
         if (!audioRef.current.src || 
             audioRef.current.src !== `http://localhost:8000/api/musica/${playlist[currentMusicIndex].id}/download/`) {
           await carregarMusica(playlist[currentMusicIndex]);
@@ -144,14 +136,12 @@ const Musica: React.FC = () => {
     }
   };
 
-  // Atualiza a música quando o índice muda
   useEffect(() => {
     if (playlist.length > 0) {
       carregarMusica(playlist[currentMusicIndex]);
     }
   }, [currentMusicIndex]);
 
-  // Configura o listener para quando a música terminar
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
